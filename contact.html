@@ -30,6 +30,14 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="assets/img/og-image.jpg">
   <script>document.documentElement.classList.add('js');</script>
+  <noscript>
+    <style>
+      .booking-steps{display:none}
+      .form-step[hidden]{display:block!important}
+      .form-step:not(.form-step--review) .form-step__actions{display:none!important}
+      .form-step--review[hidden]{display:none!important}
+    </style>
+  </noscript>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -339,99 +347,229 @@
 
           <div class="form-wrap" data-reveal data-reveal-delay="100">
             <div class="form-head">
-              <h2 class="h3">Request a service</h2>
-              <p>I-describe ang sira. Fill in the details and we will get back to you.</p>
+              <h2 class="h3">Book a repair</h2>
+              <p>I-describe ang sira. Four quick steps, then send.</p>
             </div>
 
             <p class="form-prefill" data-form-prefill hidden>
               <svg class="icon" aria-hidden="true"><use href="#i-circle-check"></use></svg>
-              <span>Requesting: <strong data-form-prefill-text>Selected service</strong>. You can change this below.</span>
+              <span>Requesting: <strong data-form-prefill-text>Selected service</strong>. You can change it in step 1.</span>
             </p>
 
             <div class="form-alert" data-form-alert role="alert" hidden></div>
 
             <form data-request-form action="mailto:OERAAS@yahoo.com.ph" method="post" enctype="text/plain" novalidate>
-              <div class="form-grid">
-                <div class="field field--hp" aria-hidden="true">
-                  <label for="website">Website</label>
-                  <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
-                </div>
-                <div class="field">
-                  <label for="name">Name</label>
-                  <input type="text" id="name" name="name" autocomplete="name" required aria-describedby="name-error">
-                  <span class="field__error" id="name-error" aria-live="polite"></span>
-                </div>
-                <div class="field">
-                  <label for="mobile">Mobile number</label>
-                  <input type="tel" id="mobile" name="mobile" autocomplete="tel" inputmode="tel" placeholder="09XX XXX XXXX" required aria-describedby="mobile-error">
-                  <span class="field__error" id="mobile-error" aria-live="polite"></span>
-                </div>
-                <div class="field field--full">
-                  <label for="email">Email <span class="optional">(optional)</span></label>
-                  <input type="email" id="email" name="email" autocomplete="email" aria-describedby="email-error">
-                  <span class="field__error" id="email-error" aria-live="polite"></span>
-                </div>
-                <div class="field">
-                  <label for="service">Service needed</label>
-                  <select id="service" name="service" required aria-describedby="service-error">
-                    <option value="">Choose a service</option>
-                    <optgroup label="Aircon">
-                      <option value="aircon-repair">Aircon repair</option>
-                      <option value="aircon-cleaning">Aircon cleaning</option>
-                      <option value="aircon-installation">Aircon installation</option>
-                    </optgroup>
-                    <optgroup label="Kitchen">
-                      <option value="refrigerator">Refrigerator repair</option>
-                      <option value="freezer">Freezer repair</option>
-                      <option value="microwave">Microwave oven repair</option>
-                      <option value="rice-cooker">Rice cooker repair</option>
-                    </optgroup>
-                    <optgroup label="Laundry">
-                      <option value="washing-machine">Washing machine repair</option>
-                      <option value="dryer">Dryer repair</option>
-                    </optgroup>
-                    <optgroup label="Home and audio-visual">
-                      <option value="tv">LED/LCD TV repair</option>
-                      <option value="tv-wall">TV wall installation</option>
-                      <option value="electric-fan">Electric fan repair</option>
-                      <option value="amplifier">Amplifier repair</option>
-                      <option value="component">Component repair</option>
-                    </optgroup>
-                    <optgroup label="Other">
-                      <option value="other">Other or not sure</option>
-                    </optgroup>
-                  </select>
-                  <span class="field__error" id="service-error" aria-live="polite"></span>
-                </div>
-                <div class="field">
-                  <label for="date">Preferred date <span class="optional">(optional)</span></label>
-                  <input type="date" id="date" name="date">
-                </div>
-                <div class="field field--full">
-                  <label for="address">Address</label>
-                  <input type="text" id="address" name="address" autocomplete="street-address" placeholder="Street, barangay, city" required aria-describedby="address-error">
-                  <span class="field__error" id="address-error" aria-live="polite"></span>
-                </div>
-                <div class="field field--full">
-                  <label for="details">What is the appliance doing? <span class="optional">(optional)</span></label>
-                  <textarea id="details" name="details" placeholder="For example: the aircon runs but the room stays warm, and water drips from the indoor unit." aria-describedby="details-hint"></textarea>
-                  <span class="field__hint" id="details-hint">Include the brand, model, or any error code if you have them.</span>
-                </div>
+              <div class="field field--hp" aria-hidden="true">
+                <label for="website">Website</label>
+                <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
               </div>
 
-              <div class="form-foot">
-                <button class="btn btn--primary" type="submit" data-form-submit><span data-submit-label>Send request</span> <svg class="icon" aria-hidden="true"><use href="#i-arrow-up-right"></use></svg></button>
-                <p class="form-note" data-form-note>This form opens your email app with the details filled in. Nothing is sent automatically, and we use your details only to respond.</p>
+              <div class="booking-steps">
+                <ol class="booking-steps__list" aria-label="Booking steps">
+                  <li class="booking-step is-current" data-step-indicator="1" aria-current="step">
+                    <span class="booking-step__num">01</span>
+                    <span class="booking-step__label">Service</span>
+                  </li>
+                  <li class="booking-step" data-step-indicator="2">
+                    <span class="booking-step__num">02</span>
+                    <span class="booking-step__label">Schedule</span>
+                  </li>
+                  <li class="booking-step" data-step-indicator="3">
+                    <span class="booking-step__num">03</span>
+                    <span class="booking-step__label">Contact</span>
+                  </li>
+                  <li class="booking-step" data-step-indicator="4">
+                    <span class="booking-step__num">04</span>
+                    <span class="booking-step__label">Review</span>
+                  </li>
+                </ol>
+                <p class="visually-hidden" aria-live="polite" data-step-status>Step 1 of 4: Service</p>
               </div>
+
+              <fieldset class="form-step" data-step="1">
+                <legend class="form-step__legend">What needs fixing?</legend>
+                <p class="form-step__intro">Pick the service. If you are not sure, choose Other or not sure.</p>
+                <div class="form-grid">
+                  <div class="field field--full">
+                    <label for="service">Service needed</label>
+                    <select id="service" name="service" required aria-describedby="service-error">
+                      <option value="">Choose a service</option>
+                      <optgroup label="Aircon">
+                        <option value="aircon-repair">Aircon repair</option>
+                        <option value="aircon-cleaning">Aircon cleaning</option>
+                        <option value="aircon-installation">Aircon installation</option>
+                      </optgroup>
+                      <optgroup label="Kitchen">
+                        <option value="refrigerator">Refrigerator repair</option>
+                        <option value="freezer">Freezer repair</option>
+                        <option value="microwave">Microwave oven repair</option>
+                        <option value="rice-cooker">Rice cooker repair</option>
+                      </optgroup>
+                      <optgroup label="Laundry">
+                        <option value="washing-machine">Washing machine repair</option>
+                        <option value="dryer">Dryer repair</option>
+                      </optgroup>
+                      <optgroup label="Home and audio-visual">
+                        <option value="tv">LED/LCD TV repair</option>
+                        <option value="tv-wall">TV wall installation</option>
+                        <option value="electric-fan">Electric fan repair</option>
+                        <option value="amplifier">Amplifier repair</option>
+                        <option value="component">Component repair</option>
+                      </optgroup>
+                      <optgroup label="Other">
+                        <option value="other">Other or not sure</option>
+                      </optgroup>
+                    </select>
+                    <span class="field__error" id="service-error" aria-live="polite"></span>
+                  </div>
+                  <div class="field">
+                    <label for="units">How many units?</label>
+                    <select id="units" name="units">
+                      <option value="1">1 unit</option>
+                      <option value="2">2 units</option>
+                      <option value="3">3 units</option>
+                      <option value="4+">4 or more</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="brand-model">Brand and model <span class="optional">(optional)</span></label>
+                    <input type="text" id="brand-model" name="brandModel" placeholder="e.g. American Home 1.5 HP" autocomplete="off">
+                  </div>
+                  <div class="field field--full">
+                    <label for="details">What is it doing? <span class="optional">(optional)</span></label>
+                    <textarea id="details" name="details" placeholder="For example: the aircon runs but the room stays warm, and water drips from the indoor unit." aria-describedby="details-hint"></textarea>
+                    <span class="field__hint" id="details-hint">Any sound, leak, error code, or when it started.</span>
+                  </div>
+                </div>
+                <div class="form-step__actions">
+                  <button class="btn btn--primary" type="button" data-step-next>Continue <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"></use></svg></button>
+                </div>
+              </fieldset>
+
+              <fieldset class="form-step" data-step="2" hidden>
+                <legend class="form-step__legend">When works for you?</legend>
+                <p class="form-step__intro">Choose a day and a window. We will confirm the exact time by call or text.</p>
+                <div class="form-grid">
+                  <div class="field">
+                    <label for="date">Preferred date <span class="optional">(optional)</span></label>
+                    <input type="date" id="date" name="date" aria-describedby="date-error date-hint">
+                    <span class="field__hint" id="date-hint">Leave blank if you are flexible.</span>
+                    <span class="field__error" id="date-error" aria-live="polite"></span>
+                  </div>
+                  <div class="field">
+                    <label for="time">Preferred time</label>
+                    <select id="time" name="time">
+                      <option value="flexible">Any time / flexible</option>
+                      <option value="morning">Morning</option>
+                      <option value="afternoon">Afternoon</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-step__actions">
+                  <button class="btn btn--outline" type="button" data-step-back>Back</button>
+                  <button class="btn btn--primary" type="button" data-step-next>Continue <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"></use></svg></button>
+                </div>
+              </fieldset>
+
+              <fieldset class="form-step" data-step="3" hidden>
+                <legend class="form-step__legend">Where should we go?</legend>
+                <p class="form-step__intro">Leave your contact details and the complete address.</p>
+                <div class="form-grid">
+                  <div class="field">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" autocomplete="name" required aria-describedby="name-error">
+                    <span class="field__error" id="name-error" aria-live="polite"></span>
+                  </div>
+                  <div class="field">
+                    <label for="mobile">Mobile number</label>
+                    <input type="tel" id="mobile" name="mobile" autocomplete="tel" inputmode="tel" placeholder="09XX XXX XXXX" required aria-describedby="mobile-error">
+                    <span class="field__error" id="mobile-error" aria-live="polite"></span>
+                  </div>
+                  <div class="field field--full">
+                    <label for="email">Email <span class="optional">(optional)</span></label>
+                    <input type="email" id="email" name="email" autocomplete="email" aria-describedby="email-error">
+                    <span class="field__error" id="email-error" aria-live="polite"></span>
+                  </div>
+                  <div class="field field--full">
+                    <label for="address">Complete address</label>
+                    <input type="text" id="address" name="address" autocomplete="street-address" placeholder="House number, street, barangay, city" required aria-describedby="address-error">
+                    <span class="field__error" id="address-error" aria-live="polite"></span>
+                  </div>
+                  <div class="field field--full">
+                    <label for="landmark">Landmark <span class="optional">(optional)</span></label>
+                    <input type="text" id="landmark" name="landmark" placeholder="Near a school, church, or covered court" autocomplete="off">
+                  </div>
+                </div>
+                <div class="form-step__actions">
+                  <button class="btn btn--outline" type="button" data-step-back>Back</button>
+                  <button class="btn btn--primary" type="button" data-step-next>Review booking <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"></use></svg></button>
+                </div>
+              </fieldset>
+
+              <fieldset class="form-step form-step--review" data-step="4" hidden>
+                <legend class="form-step__legend">Check your booking.</legend>
+                <p class="form-step__intro">One last look before we send it.</p>
+
+                <div class="booking-review" data-booking-review>
+                  <div class="booking-review__group">
+                    <h3>Service</h3>
+                    <dl class="booking-review__list">
+                      <div class="booking-review__row"><dt>Service</dt><dd data-review-service>Not set</dd></div>
+                      <div class="booking-review__row"><dt>Units</dt><dd data-review-units>1</dd></div>
+                      <div class="booking-review__row"><dt>Brand / model</dt><dd data-review-brand>Not provided</dd></div>
+                      <div class="booking-review__row"><dt>Concern</dt><dd data-review-details>Not provided</dd></div>
+                    </dl>
+                  </div>
+                  <div class="booking-review__group">
+                    <h3>Schedule</h3>
+                    <dl class="booking-review__list">
+                      <div class="booking-review__row"><dt>Date</dt><dd data-review-date>Flexible</dd></div>
+                      <div class="booking-review__row"><dt>Time</dt><dd data-review-time>Any time / flexible</dd></div>
+                    </dl>
+                  </div>
+                  <div class="booking-review__group booking-review__group--contact">
+                    <h3>Contact</h3>
+                    <dl class="booking-review__list">
+                      <div class="booking-review__row"><dt>Name</dt><dd data-review-name>Not set</dd></div>
+                      <div class="booking-review__row"><dt>Mobile</dt><dd data-review-mobile>Not set</dd></div>
+                      <div class="booking-review__row"><dt>Email</dt><dd data-review-email>Not provided</dd></div>
+                      <div class="booking-review__row"><dt>Address</dt><dd data-review-address>Not set</dd></div>
+                      <div class="booking-review__row"><dt>Landmark</dt><dd data-review-landmark>Not provided</dd></div>
+                    </dl>
+                  </div>
+                </div>
+
+                <div class="field field--full consent-field">
+                  <label class="checkbox" for="consent">
+                    <input type="checkbox" id="consent" name="consent" value="Yes" required aria-describedby="consent-error">
+                    <span>I confirm the details are correct and agree to be contacted about this booking.</span>
+                  </label>
+                  <span class="field__error" id="consent-error" aria-live="polite"></span>
+                </div>
+
+                <div class="form-step__actions">
+                  <button class="btn btn--outline" type="button" data-step-back>Back</button>
+                  <button class="btn btn--primary" type="submit" data-form-submit><span data-submit-label>Send booking request</span> <svg class="icon" aria-hidden="true"><use href="#i-arrow-up-right"></use></svg></button>
+                </div>
+                <p class="form-note" data-form-note>This form opens your email app with the booking details. Nothing is sent automatically, and we use your details only to respond.</p>
+              </fieldset>
+
+              <noscript>
+                <div class="form-noscript-submit">
+                  <button class="btn btn--primary" type="submit">Send by email <svg class="icon" aria-hidden="true"><use href="#i-arrow-up-right"></use></svg></button>
+                  <p>JavaScript is off. This opens your email app with the booking details.</p>
+                </div>
+              </noscript>
             </form>
 
             <div class="form-success" data-form-success hidden>
               <span class="form-success__icon"><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg></span>
-              <h2 class="h3" tabindex="-1" data-success-title>Your request is ready to send.</h2>
-              <p data-success-copy>Your email app should have opened with the details filled in. Send the message and we will reply as soon as we can.</p>
+              <h2 class="h3" tabindex="-1" data-success-title>Salamat! Your booking is ready to send.</h2>
+              <p data-success-copy>Your email app should have opened with the booking details. Send the message and we will confirm the schedule.</p>
+              <p class="form-success__reference" data-success-reference hidden>Reference: <strong data-success-reference-value></strong></p>
               <p data-success-detail>If it did not open, email <a href="mailto:OERAAS@yahoo.com.ph">OERAAS@yahoo.com.ph</a> or call <a href="tel:+639052663284">0905 266 3284</a>.</p>
               <div class="form-success__actions">
-                <button class="btn btn--outline btn--sm" type="button" data-form-reset>Send another request</button>
+                <button class="btn btn--outline btn--sm" type="button" data-form-reset>Book another repair</button>
                 <a class="link-arrow" href="tel:+639052663284">Call the shop <svg class="icon" aria-hidden="true"><use href="#i-arrow-up-right"></use></svg></a>
               </div>
             </div>
@@ -510,7 +648,7 @@
       </div>
       <div class="footer__bottom">
         <p>&copy; <span data-year>2026</span> Orlan Electronics. Ref and aircon services.</p>
-        <p>Photography via <a href="https://www.pexels.com" target="_blank" rel="noopener">Pexels</a>.</p>
+        <p>Developed by <a href="https://geanpaulo.com" target="_blank" rel="noopener">Gean Paulo</a>.</p>
       </div>
     </div>
   </footer>
