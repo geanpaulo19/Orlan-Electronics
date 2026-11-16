@@ -204,19 +204,34 @@
     var successTitle = doc.querySelector("[data-success-title]");
     var successCopy = doc.querySelector("[data-success-copy]");
     var successDetail = doc.querySelector("[data-success-detail]");
+    var successReference = doc.querySelector("[data-success-reference]");
+    var successReferenceValue = doc.querySelector("[data-success-reference-value]");
+    var stepStatus = form.querySelector("[data-step-status]");
+    var steps = Array.prototype.slice.call(form.querySelectorAll("[data-step]"));
+    var stepIndicators = Array.prototype.slice.call(form.querySelectorAll("[data-step-indicator]"));
     var serviceSelect = form.querySelector("#service");
+    var dateInput = form.querySelector("#date");
+    var consentInput = form.querySelector("#consent");
     var honeypot = form.querySelector('[name="website"]');
     var params = new URLSearchParams(window.location.search);
     var requested = params.get("service");
+    var totalSteps = steps.length;
+    var currentStep = 1;
     var submitting = false;
-    var originalLabel = submitLabel ? submitLabel.textContent : "Send request";
+    var reference = "";
+    var originalLabel = submitLabel ? submitLabel.textContent : "Send booking request";
     var businessEmail = config.businessEmail || "OERAAS@yahoo.com.ph";
     var businessPhone = config.businessPhone || "0905 266 3284";
     var phoneHref = "tel:+639052663284";
     var facebookUrl = "https://www.facebook.com/search/top?q=Orlan%20Elektronics";
+    var today = localISODate(new Date());
+
+    if (dateInput) {
+      dateInput.min = today;
+    }
 
     if (formNote && isOnline) {
-      formNote.textContent = "Your request goes straight to our service team. We use your details only to respond.";
+      formNote.textContent = "Your booking goes straight to our service team. We use your details only to respond.";
     }
 
     var serviceLabels = {
@@ -237,6 +252,14 @@
       "other": "Other or not sure"
     };
 
+    var timeLabels = {
+      "flexible": "Any time / flexible",
+      "morning": "Morning",
+      "afternoon": "Afternoon"
+    };
+
+    var stepNames = ["Service", "Schedule", "Contact", "Review"];
+
     if (requested && serviceSelect) {
       var matching = Array.prototype.slice.call(serviceSelect.options).some(function (option) {
         return option.value === requested;
@@ -252,9 +275,123 @@
       }
     }
 
+    function localISODate(date) {
+      var year = date.getFullYear();
+      var month = String(date.getMonth() + 1).padStart(2, "0");
+      var day = String(date.getDate()).padStart(2, "0");
+      return year + "-" + month + "-" + day;
+    }
+
     function valueOf(name) {
       var input = form.querySelector('[name="' + name + '"]');
       return input ? input.value.trim() : "";
+    }
+
+    function formatDate(value) {
+      if (!value) {
+        return "Flexible";
+      }
+
+      var parsed = new Date(value + "T00:00:00");
+
+      if (isNaN(parsed.getTime())) {
+        return value;
+      }
+
+      try {
+        return parsed.toLocaleDateString("en-PH", {
+          weekday: "short",
+          year: "numeric",
+          month: "short",
+          day: "numeric"
+        });
+      } catch (error) {
+        return value;
+      }
+    }
+
+    function setReview(selector, value) {
+      var target = form.querySelector(selector);
+
+      if (target) {
+        target.textContent = value;
+      }
+    }
+
+    function updateReview() {
+      setReview("[data-review-service]", serviceLabels[valueOf("service")] || valueOf("service") || "Not set");
+      setReview("[data-review-units]", valueOf("units") || "1");
+      setReview("[data-review-brand]", valueOf("brandModel") || "Not provided");
+      setReview("[data-review-details]", valueOf("details") || "Not provided");
+      setReview("[data-review-date]", formatDate(valueOf("date")));
+      setReview("[data-review-time]", timeLabels[valueOf("time")] || "Any time / flexible");
+      setReview("[data-review-name]", valueOf("name") || "Not set");
+      setReview("[data-review-mobile]", valueOf("mobile") || "Not set");
+      setReview("[data-review-email]", valueOf("email") || "Not provided");
+      setReview("[data-review-address]", valueOf("address") || "Not set");
+      setReview("[data-review-landmark]", valueOf("landmark") || "Not provided");
+    }
+
+    function showStep(stepNumber, focus) {
+      if (stepNumber < 1) {
+        stepNumber = 1;
+      }
+
+      if (stepNumber > totalSteps) {
+        stepNumber = totalSteps;
+      }
+
+      currentStep = stepNumber;
+
+      steps.forEach(function (step, index) {
+        step.hidden = index + 1 !== stepNumber;
+      });
+
+      stepIndicators.forEach(function (indicator, index) {
+        var number = index + 1;
+        indicator.classList.toggle("is-current", number === stepNumber);
+        indicator.classList.toggle("is-done", number < stepNumber);
+
+        if (number === stepNumber) {
+          indicator.setAttribute("aria-current", "step");
+        } else {
+          indicator.removeAttribute("aria-current");
+        }
+      });
+
+      if (stepStatus) {
+        stepStatus.textContent = "Step " + stepNumber + " of " + totalSteps + ": " + stepNames[stepNumber - 1];
+      }
+
+      if (stepNumber === totalSteps) {
+        updateReview();
+      }
+
+      if (!focus) {
+        return;
+      }
+
+      var activeStep = steps[stepNumber - 1];
+
+      if (!activeStep) {
+        return;
+      }
+
+      if (stepNumber === totalSteps) {
+        var legend = activeStep.querySelector(".form-step__legend");
+
+        if (legend) {
+          legend.setAttribute("tabindex", "-1");
+          legend.focus();
+        }
+        return;
+      }
+
+      var firstField = activeStep.querySelector("input:not([type=hidden]):not([tabindex='-1']), select, textarea");
+
+      if (firstField) {
+        firstField.focus();
+      }
     }
 
     function fieldWrap(input) {
@@ -280,60 +417,105 @@
       }
     }
 
-    function validate() {
-      var valid = true;
-      var firstInvalid = null;
+    function validateStep(stepNumber) {
+      var invalid = null;
       var name = form.querySelector('[name="name"]');
       var mobile = form.querySelector('[name="mobile"]');
       var email = form.querySelector('[name="email"]');
       var address = form.querySelector('[name="address"]');
-      var service = form.querySelector('[name="service"]');
-      var details = form.querySelector('[name="details"]');
 
-      setError(name, "");
-      setError(mobile, "");
-      setError(email, "");
-      setError(address, "");
-      setError(service, "");
-      setError(details, "");
-
-      if (valueOf("name").length < 2) {
-        setError(name, "Please enter your name.");
-        valid = false;
-        firstInvalid = firstInvalid || name;
+      if (stepNumber === 1) {
+        if (!valueOf("service")) {
+          setError(serviceSelect, "Choose the service you need.");
+          invalid = serviceSelect;
+        } else {
+          setError(serviceSelect, "");
+        }
       }
 
-      var digits = valueOf("mobile").replace(/\D/g, "");
-      if (digits.length < 10) {
-        setError(mobile, "Enter a mobile number with at least 10 digits.");
-        valid = false;
-        firstInvalid = firstInvalid || mobile;
+      if (stepNumber === 2) {
+        setError(dateInput, "");
+
+        if (valueOf("date") && valueOf("date") < today) {
+          setError(dateInput, "Choose today or a future date.");
+          invalid = dateInput;
+        }
       }
 
-      var emailValue = valueOf("email");
-      if (emailValue && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
-        setError(email, "Check the email address.");
-        valid = false;
-        firstInvalid = firstInvalid || email;
+      if (stepNumber === 3) {
+        setError(name, "");
+        setError(mobile, "");
+        setError(email, "");
+        setError(address, "");
+
+        if (valueOf("name").length < 2) {
+          setError(name, "Please enter your name.");
+          invalid = invalid || name;
+        }
+
+        var digits = valueOf("mobile").replace(/\D/g, "");
+        if (digits.length < 10) {
+          setError(mobile, "Enter a mobile number with at least 10 digits.");
+          invalid = invalid || mobile;
+        }
+
+        if (valueOf("email") && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valueOf("email"))) {
+          setError(email, "Check the email address.");
+          invalid = invalid || email;
+        }
+
+        if (valueOf("address").length < 6) {
+          setError(address, "Add your house number, street, barangay, or city.");
+          invalid = invalid || address;
+        }
       }
 
-      if (valueOf("address").length < 6) {
-        setError(address, "Add your street, barangay, or city.");
-        valid = false;
-        firstInvalid = firstInvalid || address;
+      if (stepNumber === 4) {
+        if (!consentInput || !consentInput.checked) {
+          setError(consentInput, "Please confirm before sending.");
+          invalid = consentInput;
+        } else {
+          setError(consentInput, "");
+        }
       }
 
-      if (!valueOf("service")) {
-        setError(service, "Choose the service you need.");
-        valid = false;
-        firstInvalid = firstInvalid || service;
+      return invalid;
+    }
+
+    function validateAll() {
+      var firstInvalid = null;
+      var firstStep = 0;
+
+      for (var i = 1; i <= totalSteps; i++) {
+        var invalid = validateStep(i);
+
+        if (invalid && !firstInvalid) {
+          firstInvalid = invalid;
+          firstStep = i;
+        }
       }
 
       if (firstInvalid) {
+        showStep(firstStep, false);
         firstInvalid.focus();
+        return false;
       }
 
-      return valid;
+      return true;
+    }
+
+    function clearAllErrors() {
+      Array.prototype.forEach.call(form.querySelectorAll(".field.has-error"), function (field) {
+        field.classList.remove("has-error");
+      });
+
+      Array.prototype.forEach.call(form.querySelectorAll(".field__error"), function (error) {
+        error.textContent = "";
+      });
+
+      Array.prototype.forEach.call(form.querySelectorAll("[aria-invalid]"), function (input) {
+        input.removeAttribute("aria-invalid");
+      });
     }
 
     function clearAlert() {
@@ -366,13 +548,19 @@
       }
     }
 
+    function makeReference() {
+      var date = new Date();
+      var stamp = String(date.getFullYear()).slice(2) + String(date.getMonth() + 1).padStart(2, "0") + String(date.getDate()).padStart(2, "0");
+      return "ORL-" + stamp + "-" + String(Math.floor(1000 + Math.random() * 9000));
+    }
+
     function setSuccessContent(mode) {
       if (mode === "online") {
         if (successTitle) {
-          successTitle.textContent = "Salamat! Your request is in.";
+          successTitle.textContent = "Salamat! Your booking is in.";
         }
         if (successCopy) {
-          successCopy.textContent = "We received your request and will get back to you at the number you provided.";
+          successCopy.textContent = "We received your request and will confirm the schedule by call or text.";
         }
         if (successDetail) {
           successDetail.innerHTML =
@@ -380,10 +568,10 @@
         }
       } else {
         if (successTitle) {
-          successTitle.textContent = "Salamat! Your request is ready to send.";
+          successTitle.textContent = "Salamat! Your booking is ready to send.";
         }
         if (successCopy) {
-          successCopy.textContent = "Your email app should have opened with the details filled in. Send the message and we will reply as soon as we can.";
+          successCopy.textContent = "Your email app should have opened with the booking details. Send the message and we will confirm the schedule.";
         }
         if (successDetail) {
           successDetail.innerHTML =
@@ -401,6 +589,14 @@
       success.hidden = false;
       setSuccessContent(mode);
 
+      if (successReference) {
+        successReference.hidden = !reference;
+      }
+
+      if (successReferenceValue) {
+        successReferenceValue.textContent = reference;
+      }
+
       var heading = success.querySelector("h2");
       if (heading) {
         heading.setAttribute("tabindex", "-1");
@@ -411,33 +607,52 @@
     function resetForm() {
       form.reset();
       form.hidden = false;
+
       if (success) {
         success.hidden = true;
       }
+
+      reference = "";
+      if (successReference) {
+        successReference.hidden = true;
+      }
+      if (successReferenceValue) {
+        successReferenceValue.textContent = "";
+      }
+
       clearAlert();
+      clearAllErrors();
       setLoading(false);
+
       if (prefill) {
         prefill.hidden = true;
       }
-      var firstField = form.querySelector("#name");
-      if (firstField) {
-        firstField.focus();
+
+      showStep(1, false);
+
+      if (serviceSelect) {
+        serviceSelect.focus();
       }
     }
 
     function buildMailto(serviceLabel) {
-      var subject = "Service request: " + serviceLabel + " - " + valueOf("name");
+      var subject = "Booking request: " + serviceLabel + " - " + valueOf("name") + " (" + reference + ")";
       var lines = [
         "Hello Orlan Electronics,",
         "",
-        "I would like to request a service.",
+        "I would like to book a repair.",
         "",
+        "Reference: " + reference,
         "Name: " + valueOf("name"),
         "Mobile: " + valueOf("mobile"),
         "Email: " + (valueOf("email") || "Not provided"),
         "Service: " + serviceLabel,
+        "Units: " + valueOf("units"),
+        "Brand/model: " + (valueOf("brandModel") || "Not provided"),
+        "Preferred date: " + formatDate(valueOf("date")),
+        "Preferred time: " + (timeLabels[valueOf("time")] || "Any time / flexible"),
         "Address: " + valueOf("address"),
-        "Preferred date: " + (valueOf("date") || "Flexible"),
+        "Landmark: " + (valueOf("landmark") || "Not provided"),
         "",
         "Details:",
         valueOf("details") || "No additional details provided.",
@@ -450,13 +665,19 @@
 
     function submitOnline(serviceLabel) {
       var body = new URLSearchParams();
+      body.append("reference", reference);
       body.append("name", valueOf("name"));
       body.append("mobile", valueOf("mobile"));
       body.append("email", valueOf("email"));
       body.append("service", serviceLabel);
-      body.append("address", valueOf("address"));
-      body.append("preferredDate", valueOf("date"));
+      body.append("units", valueOf("units"));
+      body.append("brandModel", valueOf("brandModel"));
       body.append("details", valueOf("details"));
+      body.append("preferredDate", valueOf("date"));
+      body.append("preferredTime", timeLabels[valueOf("time")] || valueOf("time"));
+      body.append("address", valueOf("address"));
+      body.append("landmark", valueOf("landmark"));
+      body.append("consent", consentInput && consentInput.checked ? "Yes" : "No");
       body.append("submittedAt", new Date().toISOString());
       body.append("page", doc.title);
       body.append("source", window.location.href);
@@ -478,7 +699,7 @@
         .catch(function () {
           setLoading(false);
           showAlert(
-            'We could not send that request. Check your connection and try again, or call or text <a href="' +
+            'We could not send that booking. Check your connection and try again, or call or text <a href="' +
               phoneHref +
               '">' +
               businessPhone +
@@ -486,6 +707,27 @@
           );
         });
     }
+
+    Array.prototype.forEach.call(form.querySelectorAll("[data-step-next]"), function (button) {
+      button.addEventListener("click", function () {
+        clearAlert();
+        var invalid = validateStep(currentStep);
+
+        if (invalid) {
+          invalid.focus();
+          return;
+        }
+
+        showStep(currentStep + 1, true);
+      });
+    });
+
+    Array.prototype.forEach.call(form.querySelectorAll("[data-step-back]"), function (button) {
+      button.addEventListener("click", function () {
+        clearAlert();
+        showStep(currentStep - 1, true);
+      });
+    });
 
     form.addEventListener("submit", function (event) {
       event.preventDefault();
@@ -496,17 +738,30 @@
 
       clearAlert();
 
+      if (currentStep < totalSteps) {
+        var invalid = validateStep(currentStep);
+
+        if (invalid) {
+          invalid.focus();
+          return;
+        }
+
+        showStep(currentStep + 1, true);
+        return;
+      }
+
+      if (!validateAll()) {
+        return;
+      }
+
       if (honeypot && honeypot.value) {
         showSuccess("online");
         return;
       }
 
-      if (!validate()) {
-        return;
-      }
-
       var serviceValue = valueOf("service");
       var serviceLabel = serviceLabels[serviceValue] || serviceValue;
+      reference = makeReference();
 
       if (!isOnline) {
         window.location.href = buildMailto(serviceLabel);
@@ -517,17 +772,23 @@
       submitOnline(serviceLabel);
     });
 
-    form.addEventListener("input", function (event) {
+    function onFieldChange(event) {
       var input = event.target;
+
       if (input && input.matches("input, select, textarea")) {
         setError(input, "");
         clearAlert();
       }
-    });
+    }
+
+    form.addEventListener("input", onFieldChange);
+    form.addEventListener("change", onFieldChange);
 
     if (resetButton) {
       resetButton.addEventListener("click", resetForm);
     }
+
+    showStep(1, false);
   }
 
   /* ---------------------------------------------------------------
