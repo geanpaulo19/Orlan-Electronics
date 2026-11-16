@@ -981,8 +981,10 @@ a:hover {
 }
 
 .fact {
-  display: flex;
-  align-items: baseline;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  align-content: center;
   gap: 14px;
   padding: 20px 26px 20px 0;
   border-right: 1px solid var(--line);
@@ -1009,7 +1011,7 @@ a:hover {
   color: var(--muted);
   font-size: 0.8125rem;
   line-height: 1.35;
-  max-width: 20ch;
+  text-wrap: balance;
 }
 
 /* --------------------------------------------------------------------------
